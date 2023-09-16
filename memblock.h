@@ -13,12 +13,22 @@ public:
         }
         p = reinterpret_cast<T *> (p_);
     };
-    T * allocate(std::size_t /*n*/){
+    const size_t max_size = 10;
+    T * allocate(std::size_t n){
+		if (size + n > max_size)
+		{
+			throw std::bad_alloc();
+		}
       	if((size_t)next < size) return p + next++;
 	    else return nullptr;
     };
-    void deallocate(T * p, std::size_t /*n_*/){
+    void deallocate(T * p, std::size_t n_){
         --next;
+        auto mem = p;
+        if (mem + n_ == p) {
+            p = mem;
+            size += n_;
+        }
         if(!next) {
             std::free(p);
         }

@@ -44,6 +44,7 @@ public:
         if( m_head ) {
             Node* newHead = m_head->m_next;
             B.destroy(m_head);
+            B.deallocate(m_head, 1);
             m_head = newHead;
         }
     };

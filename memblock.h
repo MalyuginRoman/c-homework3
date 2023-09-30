@@ -22,7 +22,7 @@ public:
       	if((size_t)next < size) return (p + (int)n);
 	    else return nullptr;
     };
-    void deallocate(T * p, std::size_t n_){
+    void deallocate(T * p, std::size_t /*n_*/){
             std::free(p);
     };
     bool isFull(){

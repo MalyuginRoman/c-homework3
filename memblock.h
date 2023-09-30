@@ -19,7 +19,7 @@ public:
 		{
 			throw std::bad_alloc();
 		}
-      	if((size_t)next < size) return p + next++;
+      	if((size_t)next < size) return (p + (int)n);
 	    else return nullptr;
     };
     void deallocate(T * p, std::size_t n_){

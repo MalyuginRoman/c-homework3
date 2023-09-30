@@ -23,9 +23,6 @@ public:
     T * allocate(std::size_t n){
         return mem.allocate(n);
     };
-    void deallocate(value_type * p, std::size_t n){
-        mem.deallocate(p, n);
-    };
     template<typename U, typename... Args>
     void construct(U * p, Args&& ... args){
         new((void*) p) U(std::forward<Args>(args)...);

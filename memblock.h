@@ -19,8 +19,7 @@ public:
 		{
 			throw std::bad_alloc();
 		}
-	    	next += n;
-      	if((size_t)next < size) return (p + n);
+      	if((size_t)next < size) return p + next++;
 	    else return nullptr;
     };
     void deallocate(T * p, std::size_t n_){
@@ -33,6 +32,7 @@ public:
         if(!next) {
             std::free(p);
         }
+    };
     bool isFull(){
         return (size_t) next == size;
     };
@@ -65,6 +65,9 @@ public:
             return allocBlock->allocate(n);
         }
     };
+    void deallocate(T * p, std::size_t n){
+	    allocBlock->deallocate(p, n);
+    }
 private:
     std::vector<MemBlock<T>> blocks;
     MemBlock<T> * allocBlock;

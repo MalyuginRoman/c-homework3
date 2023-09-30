@@ -17,8 +17,15 @@ public:
     T * allocate(std::size_t n){
 		if (size + n > max_size) {
 			throw std::bad_alloc(); }
-      	if((size_t)next < size) return (p + n);
+      	if((size_t)n < size) return (p + n);
 	    else return nullptr;
+    };
+    void deallocate(T * p, std::size_t n_){
+    	if (!p) {return; }
+    	buff_ct -= n;
+    	if (buff_ct != 0) { return; }
+	free(buff_ptr);
+    	buff_ptr = nullptr;
     };
     bool isFull(){
         return (size_t) next == size;

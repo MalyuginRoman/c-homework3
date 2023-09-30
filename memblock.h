@@ -23,15 +23,7 @@ public:
 	    else return nullptr;
     };
     void deallocate(T * p, std::size_t n_){
-        --next;
-        auto mem = p;
-        if (mem + n_ == p) {
-            p = mem;
-            size += n_;
-        }
-        if(!next) {
             std::free(p);
-        }
     };
     bool isFull(){
         return (size_t) next == size;

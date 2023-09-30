@@ -15,18 +15,24 @@ public:
     };
     const size_t max_size = 10;
     T * allocate(std::size_t n){
-		if (size + n > max_size) {
-			throw std::bad_alloc(); }
-      	if((size_t)n < size) return (p + n);
+		if (size + n > max_size)
+		{
+			throw std::bad_alloc();
+		}
+	    	next += n;
+      	if((size_t)next < size) return (p + n);
 	    else return nullptr;
     };
     void deallocate(T * p, std::size_t n_){
-    	if (!p) {return; }
-    	size -= n;
-    	if (size != 0) { return; }
-	free(p);
-    	p = nullptr;
-    };
+        --next;
+        auto mem = p;
+        if (mem + n_ == p) {
+            p = mem;
+            size += n_;
+        }
+        if(!next) {
+            std::free(p);
+        }
     bool isFull(){
         return (size_t) next == size;
     };

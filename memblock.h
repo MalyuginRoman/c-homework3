@@ -22,10 +22,10 @@ public:
     };
     void deallocate(T * p, std::size_t n_){
     	if (!p) {return; }
-    	buff_ct -= n;
-    	if (buff_ct != 0) { return; }
-	free(buff_ptr);
-    	buff_ptr = nullptr;
+    	size -= n;
+    	if (size != 0) { return; }
+	free(p);
+    	p = nullptr;
     };
     bool isFull(){
         return (size_t) next == size;

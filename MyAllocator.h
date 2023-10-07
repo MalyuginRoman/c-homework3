@@ -1,38 +1,81 @@
 #pragma once
 
-#include <iostream>
-#include <memory>
 #include "memblock.h"
 
-template<class T>
-class MemManager;
-template<class T,size_t N>
-class MyAllocator {
-public:
+#include <cstdlib>
+#include <forward_list>
+#include <new>
+#include <stdexcept>
+
+template<typename T, size_t M>
+struct MyAllocator
+{
     using value_type = T;
     using pointer = T*;
     using const_pointer = const T*;
-    using const_reference = const T&;
     using reference = T&;
-    using size_type = std::size_t;
+    using const_reference = const T&;
     template<typename U>
-    struct rebind {
-        using other = MyAllocator<U, N>;
+    struct rebind
+    {
+        using other = MyAllocator<U, M>;
     };
-    MyAllocator(){};
-    T * allocate(std::size_t n){
-        return mem.allocate(n);
-    };
-    void deallocate(value_type * p, std::size_t n){
-        mem.deallocate(p, n);
-    };
-    template<typename U, typename... Args>
-    void construct(U * p, Args&& ... args){
-        new((void*) p) U(std::forward<Args>(args)...);
+    const size_t MAX_ELEMENTS = M;
+    std::forward_list<memory_block<T, M>> m_blocks;
+    MyAllocator() = default;
+    ~MyAllocator()
+    {
+        for(auto& block : m_blocks)
+        {
+            free(block.get_memory());
+        }
     }
-    void destroy(value_type * p){
-        p->~T();
-    };
-private:
-    MemManager<T> mem{N};
+    template<typename U, size_t N>
+    MyAllocator(const MyAllocator<U, N>&){}
+    void allocate_memory_block()
+    {
+        auto memory = std::malloc(MAX_ELEMENTS * sizeof(T));
+        if (!memory)
+            throw std::bad_alloc();
+
+        auto block = memory_block<T, M>{reinterpret_cast<T *>(memory)};
+        m_blocks.emplace_front(block);
+    }
+    T *allocate(std::size_t n)
+    {
+        if (n > MAX_ELEMENTS)
+            throw std::bad_alloc();
+        if (m_blocks.empty())
+            allocate_memory_block();
+        for(auto& block : m_blocks)
+        {
+            auto free_area = block.try_get_free_memory(n);
+            if (free_area != nullptr)
+            {
+                return free_area;
+            }
+        }
+        allocate_memory_block();
+        auto free_area = m_blocks.front().try_get_free_memory(n);
+        if (free_area != nullptr)
+            return free_area;
+        else
+            throw std::bad_alloc();
+    }
+    void deallocate(T *p, std::size_t n)
+    {
+        for(auto& block : m_blocks)
+        {
+            if (block.contains_pointer(p))
+            {
+                block.mark_as_free(p, n);
+                return;
+            }
+        }
+        throw std::out_of_range("Invalid pointer");
+    }
+    template<typename U, typename ...Args>
+    void construct(U *p, Args &&...args)
+    {new(p) U(std::forward<Args>(args)...);}
+    void destroy(T *p){p->~T();}
 };

@@ -48,7 +48,7 @@ class free_area
         {
             return m_start + m_count == address;
         }
-        void merge_right(T* area, size_t n)
+        void merge_right(size_t n)
         {
             m_count += n;
         }
@@ -109,7 +109,7 @@ class memory_block
                 }
                 if (current_free->adjoins_right(area))
                 {
-                    current_free->merge_right(area, n);
+                    current_free->merge_right(n);
                     return;
                 }
                 prev_free = current_free;
